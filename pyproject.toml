@@ -12,4 +12,7 @@ dependencies = ["llama-stack>=0.2.6", "httpx"]
 [tool.setuptools]
 packages = ["lightspeed_stack_providers"]
 
-
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+]

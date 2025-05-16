@@ -16,7 +16,7 @@ from llama_stack.apis.agents import (
     AgentSessionCreateResponse,
     Agent,
     AgentTurnResponseTurnStartPayload,
- )
+)
 
 from collections.abc import AsyncIterator
 from datetime import datetime
@@ -53,6 +53,7 @@ from llama_stack.apis.agents.openai_responses import (
 
 from .config import LightspeedAgentConfig
 
+
 class LightspeedRemoteAgentProvider(Agents):
 
     def __init__(self, config: LightspeedAgentConfig):
@@ -77,7 +78,9 @@ class LightspeedRemoteAgentProvider(Agents):
         return AgentCreateResponse(agent_id=agent_id)
 
     @webmethod(
-        route="/agents/{agent_id}/session/{session_id}/turn", method="POST", descriptive_name="create_agent_turn"
+        route="/agents/{agent_id}/session/{session_id}/turn",
+        method="POST",
+        descriptive_name="create_agent_turn",
     )
     async def create_agent_turn(
         self,
@@ -108,9 +111,12 @@ class LightspeedRemoteAgentProvider(Agents):
         message = dict(role=messages[0].role, content=messages[0].content)
 
         async with httpx.AsyncClient() as client:
-            async with client.stream('POST', self.lightspeed_agent_url, json=message) as resp:
+            async with client.stream(
+                "POST", self.lightspeed_agent_url, json=message
+            ) as resp:
                 await resp.aread()
                 resp.raise_for_status()
+
                 async def aaa():
                     async for response in resp.aiter_lines():
                         turn = Turn(
@@ -120,19 +126,19 @@ class LightspeedRemoteAgentProvider(Agents):
                             output_message=CompletionMessage(
                                 role="assistant",
                                 content=response,
-                                stop_reason=StopReason.end_of_message
-                            ) ,
+                                stop_reason=StopReason.end_of_message,
+                            ),
                             steps=[],
                             started_at=started_at,
                         )
-                        chunk =  AgentTurnResponseStreamChunk(
-                                event=AgentTurnResponseEvent(
-                                    payload=AgentTurnResponseTurnCompletePayload(
-                                        event_type=AgentTurnResponseEventType.turn_complete.value,
-                                        turn=turn,
-                                    )
-                                ),
-                            )
+                        chunk = AgentTurnResponseStreamChunk(
+                            event=AgentTurnResponseEvent(
+                                payload=AgentTurnResponseTurnCompletePayload(
+                                    event_type=AgentTurnResponseEventType.turn_complete.value,
+                                    turn=turn,
+                                )
+                            ),
+                        )
                         yield chunk
                     turn = Turn(
                         turn_id="ssss",
@@ -141,7 +147,7 @@ class LightspeedRemoteAgentProvider(Agents):
                         output_message=CompletionMessage(
                             role="assistant",
                             content="",
-                            stop_reason=StopReason.end_of_turn
+                            stop_reason=StopReason.end_of_turn,
                         ),
                         steps=[],
                         started_at=started_at,
@@ -155,8 +161,8 @@ class LightspeedRemoteAgentProvider(Agents):
                         ),
                     )
                     yield chunk
-                return aaa()
 
+                return aaa()
 
     @webmethod(
         route="/agents/{agent_id}/session/{session_id}/turn/{turn_id}/resume",
@@ -224,8 +230,11 @@ class LightspeedRemoteAgentProvider(Agents):
         """
         ...
 
-
-    @webmethod(route="/agents/{agent_id}/session", method="POST", descriptive_name="create_agent_session")
+    @webmethod(
+        route="/agents/{agent_id}/session",
+        method="POST",
+        descriptive_name="create_agent_session",
+    )
     async def create_agent_session(
         self,
         agent_id: str,
@@ -282,7 +291,9 @@ class LightspeedRemoteAgentProvider(Agents):
         ...
 
     @webmethod(route="/agents", method="GET")
-    async def list_agents(self, start_index: int | None = None, limit: int | None = None) -> PaginatedResponse:
+    async def list_agents(
+        self, start_index: int | None = None, limit: int | None = None
+    ) -> PaginatedResponse:
         """List all agents.
 
         :param start_index: The index to start the pagination from.
@@ -350,5 +361,3 @@ class LightspeedRemoteAgentProvider(Agents):
         :param model: The underlying LLM used for completions.
         :param previous_response_id: (Optional) if specified, the new response will be a continuation of the previous response. This can be used to easily fork-off new responses from existing responses.
         """
-
-
