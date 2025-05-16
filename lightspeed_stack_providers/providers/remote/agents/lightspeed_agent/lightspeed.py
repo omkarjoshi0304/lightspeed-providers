@@ -15,34 +15,22 @@ from llama_stack.apis.agents import (
     Session,
     AgentSessionCreateResponse,
     Agent,
-    AgentTurnResponseTurnStartPayload,
 )
 
 from collections.abc import AsyncIterator
 from datetime import datetime
-from enum import Enum
-from typing import Annotated, Any, Literal, Protocol, runtime_checkable
 
-from pydantic import BaseModel, ConfigDict, Field
-
-from llama_stack.apis.common.content_types import URL, ContentDelta, InterleavedContent
 from llama_stack.apis.common.responses import PaginatedResponse
 from llama_stack.apis.inference import (
     CompletionMessage,
-    ResponseFormat,
-    SamplingParams,
-    ToolCall,
-    ToolChoice,
     ToolConfig,
-    ToolPromptFormat,
     ToolResponse,
     ToolResponseMessage,
     UserMessage,
 )
-from llama_stack.apis.safety import SafetyViolation
-from llama_stack.apis.tools import ToolDef
+
 from llama_stack.models.llama.datatypes import StopReason
-from llama_stack.schema_utils import json_schema_type, register_schema, webmethod
+from llama_stack.schema_utils import webmethod
 
 from llama_stack.apis.agents.openai_responses import (
     OpenAIResponseInput,
@@ -55,7 +43,6 @@ from .config import LightspeedAgentConfig
 
 
 class LightspeedRemoteAgentProvider(Agents):
-
     def __init__(self, config: LightspeedAgentConfig):
         self.config = config
         self.lightspeed_agent_url = config.api_url
