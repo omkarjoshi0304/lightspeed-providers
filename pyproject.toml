@@ -3,13 +3,13 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llama_stack_lightspeed_providers"
+name = "lightspeed_stack_providers"
 version = "0.1.0"
-description = "Lightspeed providers for llama-stack"
+description = "Lightspeed Stack providers for llama-stack"
 requires-python = ">=3.10"
 dependencies = ["llama-stack", "httpx"]
 
 [tool.setuptools]
-packages = ["llama_stack_lightspeed_providers"]
+packages = ["lightspeed_stack_providers"]
 
 

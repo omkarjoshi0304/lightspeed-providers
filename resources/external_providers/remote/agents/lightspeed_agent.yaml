@@ -2,7 +2,7 @@ api: Api.agents
 adapter:
   adapter_type: lightspeed_agent
   pip_packages: []
-  config_class: llama_stack_lightspeed_providers.providers.remote.agents.lightspeed_agent.config.LightspeedAgentConfig
-  module: llama_stack_lightspeed_providers.providers.remote.agents.lightspeed_agent
+  config_class: lightspeed_stack_providers.providers.remote.agents.lightspeed_agent.config.LightspeedAgentConfig
+  module: lightspeed_stack_providers.providers.remote.agents.lightspeed_agent
 api_dependencies: []
 optional_api_dependencies: []
