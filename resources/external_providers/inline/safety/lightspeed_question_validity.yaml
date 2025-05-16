@@ -1,0 +1,7 @@
+module: lightspeed_stack_providers.providers.inline.safety.lightspeed_question_validity
+config_class: lightspeed_stack_providers.providers.inline.safety.lightspeed_question_validity.config.QuestionValidityShieldConfig
+pip_packages: []
+api_dependencies:
+  - inference
+optional_api_dependencies: []
+
