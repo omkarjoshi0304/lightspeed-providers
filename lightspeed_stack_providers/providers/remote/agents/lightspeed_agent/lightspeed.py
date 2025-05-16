@@ -14,24 +14,38 @@ from llama_stack.apis.agents import (
     AgentStepResponse,
     Session,
     AgentSessionCreateResponse,
-    PaginatedResponse,
     Agent,
-)
+    AgentTurnResponseTurnStartPayload,
+ )
 
 from collections.abc import AsyncIterator
 from datetime import datetime
+from enum import Enum
+from typing import Annotated, Any, Literal, Protocol, runtime_checkable
+
+from pydantic import BaseModel, ConfigDict, Field
+
+from llama_stack.apis.common.content_types import URL, ContentDelta, InterleavedContent
+from llama_stack.apis.common.responses import PaginatedResponse
 from llama_stack.apis.inference import (
     CompletionMessage,
+    ResponseFormat,
+    SamplingParams,
+    ToolCall,
+    ToolChoice,
     ToolConfig,
+    ToolPromptFormat,
     ToolResponse,
     ToolResponseMessage,
     UserMessage,
 )
+from llama_stack.apis.safety import SafetyViolation
+from llama_stack.apis.tools import ToolDef
 from llama_stack.models.llama.datatypes import StopReason
-from llama_stack.schema_utils import webmethod
+from llama_stack.schema_utils import json_schema_type, register_schema, webmethod
 
 from llama_stack.apis.agents.openai_responses import (
-    OpenAIResponseInputMessage,
+    OpenAIResponseInput,
     OpenAIResponseInputTool,
     OpenAIResponseObject,
     OpenAIResponseObjectStream,
@@ -268,9 +282,11 @@ class LightspeedRemoteAgentProvider(Agents):
         ...
 
     @webmethod(route="/agents", method="GET")
-    async def list_agents(self) -> PaginatedResponse:
+    async def list_agents(self, start_index: int | None = None, limit: int | None = None) -> PaginatedResponse:
         """List all agents.
 
+        :param start_index: The index to start the pagination from.
+        :param limit: The number of agents to return.
         :returns: A PaginatedResponse.
         """
         ...
@@ -288,6 +304,8 @@ class LightspeedRemoteAgentProvider(Agents):
     async def list_agent_sessions(
         self,
         agent_id: str,
+        start_index: int | None = None,
+        limit: int | None = None,
     ) -> PaginatedResponse:
         """List all session(s) of a given agent.
 
@@ -318,7 +336,7 @@ class LightspeedRemoteAgentProvider(Agents):
     @webmethod(route="/openai/v1/responses", method="POST")
     async def create_openai_response(
         self,
-        input: str | list[OpenAIResponseInputMessage],
+        input: str | list[OpenAIResponseInput],
         model: str,
         previous_response_id: str | None = None,
         store: bool | None = True,
