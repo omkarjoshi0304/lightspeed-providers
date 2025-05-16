@@ -1,7 +1,9 @@
 from typing import Any
 from string import Template
 
-from lightspeed_stack_providers.providers.inline.safety.lightspeed_question_validity.config import QuestionValidityShieldConfig
+from lightspeed_stack_providers.providers.inline.safety.lightspeed_question_validity.config import (
+    QuestionValidityShieldConfig,
+)
 
 from llama_stack.apis.shields import Shield
 from llama_stack.distribution.datatypes import Api
@@ -64,6 +66,7 @@ INVALID_MESSAGE = (
 
 PROMPT_TEMPLATE = Template(f"{PROMPT_TASK}")
 
+
 class QuestionValidityShieldImpl(Safety, ShieldsProtocolPrivate):
 
     def __init__(self, config: QuestionValidityShieldConfig, deps) -> None:
@@ -80,10 +83,10 @@ class QuestionValidityShieldImpl(Safety, ShieldsProtocolPrivate):
         pass
 
     async def run_shield(
-            self,
-            shield_id: str,
-            messages: list[Message],
-            params: dict[str, Any] = None,
+        self,
+        shield_id: str,
+        messages: list[Message],
+        params: dict[str, Any] = None,
     ) -> RunShieldResponse:
         shield = await self.shield_store.get_shield(shield_id)
         if not shield:
@@ -91,7 +94,7 @@ class QuestionValidityShieldImpl(Safety, ShieldsProtocolPrivate):
 
         messages = messages.copy()
         # [TODO] manstis: Ensure this is the latest User message
-        message: UserMessage = messages[len(messages)-1:][0]
+        message: UserMessage = messages[len(messages) - 1 :][0]
         model_id = self.config.model_id
 
         impl = QuestionValidityRunner(
@@ -104,9 +107,9 @@ class QuestionValidityShieldImpl(Safety, ShieldsProtocolPrivate):
 
 class QuestionValidityRunner:
     def __init__(
-            self,
-            model_id: str,
-            inference_api: Inference,
+        self,
+        model_id: str,
+        inference_api: Inference,
     ):
         self.model_id = model_id
         self.inference_api = inference_api
