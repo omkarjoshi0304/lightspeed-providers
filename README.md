@@ -5,6 +5,7 @@ Source code for our custom providers.
 
 Manual procedure, assuming an existing PyPI API token available:
 
-    pip install build twine
-    pip -m build
-    twine upload dist/*
+    ## Generate distribution archives to be uploaded into Python registry
+    pdm run python -m build
+    ## Upload distribution archives into Python registry
+    pdm run python -m twine upload --repository ${PYTHON_REGISTRY} dist/*
