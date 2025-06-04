@@ -14,14 +14,14 @@ from llama_stack.apis.tools import (
     ToolRuntime,
 )
 from llama_stack.distribution.request_headers import NeedsRequestProviderData
-from llama_stack.providers.datatypes import ToolsProtocolPrivate
+from llama_stack.providers.datatypes import ToolGroupsProtocolPrivate
 
 from .auth_type import AuthType
 from .config import LightspeedToolConfig
 
 
 class LightspeedToolRuntimeImp(
-    ToolsProtocolPrivate, ToolRuntime, NeedsRequestProviderData
+    ToolGroupsProtocolPrivate, ToolRuntime, NeedsRequestProviderData
 ):
     def __init__(self, config: LightspeedToolConfig):
         self.config = config
