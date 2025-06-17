@@ -16,7 +16,6 @@ from llama_stack.apis.tools import (
 from llama_stack.distribution.request_headers import NeedsRequestProviderData
 from llama_stack.providers.datatypes import ToolGroupsProtocolPrivate
 
-from .auth_type import AuthType
 from .config import LightspeedToolConfig
 
 
@@ -35,21 +34,28 @@ class LightspeedToolRuntimeImp(
     async def unregister_tool(self, tool_id: str) -> None:
         pass
 
-    def _get_auth_headers(self) -> dict[str, str]:
+    def _get_auth_headers(self, tool_group_id: str | None = None) -> dict[str, str]:
         headers = {}
         # a global api_key can be passed via configuration
         api_key = self.config.api_key
-        provider_data = self.get_request_provider_data()
-
-        if provider_data is not None and provider_data.lightspeed_api_key is not None:
-            if provider_data.lightspeed_auth_type == AuthType.Bearer:
-                headers["Authorization"] = f"Bearer {provider_data.lightspeed_api_key}"
-            elif provider_data.lightspeed_auth_type == AuthType.Header:
-                headers[provider_data.lightspeed_auth_header] = (
-                    provider_data.lightspeed_api_key
-                )
-        elif api_key:
+        if api_key:
             headers["Authorization"] = f"Bearer {api_key}"
+
+        provider_data = self.get_request_provider_data()
+        if (
+            provider_data is not None
+            and provider_data.lightspeed_tool_groups_headers is not None
+        ):
+            # check for any tool_groups and the current tool_group for provided client headers
+            for config_tool_group_id in ["*", tool_group_id]:
+                for key, value in provider_data.lightspeed_tool_groups_headers.get(
+                    config_tool_group_id, {}
+                ).items():
+                    if key.lower() == "authorization":
+                        # this overrides the global api_key header value if specified
+                        headers["Authorization"] = value
+                    else:
+                        headers[key] = value
 
         # Note: Do not raise exception when headers is empty as some mcp endpoints may be public
         # and do not support authentication
@@ -62,7 +68,7 @@ class LightspeedToolRuntimeImp(
         if mcp_endpoint is None:
             raise ValueError("mcp_endpoint is required")
 
-        headers = self._get_auth_headers()
+        headers = self._get_auth_headers(tool_group_id)
 
         tools = []
         async with sse_client(mcp_endpoint.uri, headers=headers) as streams:
@@ -104,7 +110,7 @@ class LightspeedToolRuntimeImp(
         if urlparse(endpoint).scheme not in ("http", "https"):
             raise ValueError(f"Endpoint {endpoint} is not a valid HTTP(S) URL")
 
-        headers = self._get_auth_headers()
+        headers = self._get_auth_headers(tool.toolgroup_id)
 
         async with sse_client(endpoint, headers=headers) as streams:
             async with ClientSession(*streams) as session:
