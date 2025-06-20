@@ -2,7 +2,7 @@ import json
 import uuid
 from collections.abc import AsyncGenerator
 
-from llama_stack.apis.agents import AgentConfig, AgentTurnCreateRequest
+from llama_stack.apis.agents import AgentConfig, AgentTurnCreateRequest, StepType
 from llama_stack.log import get_logger
 from llama_stack.providers.inline.agents.meta_reference.agent_instance import ChatAgent
 from llama_stack.providers.utils.telemetry import tracing
@@ -128,6 +128,20 @@ class LightspeedChatAgent(ChatAgent):
         filter self.tool_defs, self.tool_name_to_args to correspond to user prompt
         """
 
+        # define the list of already called tool names as it may happen that llm will decide to call them again
+        # and the new prompt does not contain specific hints to detect/guess them from the current prompt message
+        turns = await self.storage.get_session_turns(request.session_id)
+        already_called_tool_names = {
+            tool_call.tool_name
+            for turn in turns
+            for step in turn.steps
+            if step.step_type == StepType.tool_execution
+            for tool_call in step.tool_calls
+        }
+        logger.debug(
+            "already called toll names >>>>>>> %s ",
+            already_called_tool_names,
+        )
         message = "\n".join([message.content for message in request.messages])
         tools = [
             dict(tool_name=tool.tool_name, description=tool.description)
@@ -166,17 +180,19 @@ class LightspeedChatAgent(ChatAgent):
                 filtered_tools_names = []
                 logger.error(exp)
 
-        if filtered_tools_names:
+        if filtered_tools_names or already_called_tool_names:
             original_tools_count = len(self.tool_defs)
             self.tool_defs = list(
                 filter(
-                    lambda tool: tool.tool_name in filtered_tools_names, self.tool_defs
+                    lambda tool: tool.tool_name in filtered_tools_names
+                    or tool.tool_name in already_called_tool_names,
+                    self.tool_defs,
                 )
             )
             self.tool_name_to_args = {
                 key: value
                 for key, value in self.tool_name_to_args.items()
-                if key in filtered_tools_names
+                if key in filtered_tools_names or key in already_called_tool_names
             }
             logger.debug(
                 "filtered tools count (how much tools was removed):  >>>>>>> %d ",
