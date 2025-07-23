@@ -1,0 +1,6 @@
+module: lightspeed_stack_providers.providers.inline.safety.lightspeed_redaction
+config_class: lightspeed_stack_providers.providers.inline.safety.lightspeed_redaction.config.RedactionShieldConfig
+pip_packages: ["lightspeed_stack_providers"]
+api_dependencies:
+  - safety
+optional_api_dependencies: []

@@ -48,11 +48,11 @@ class QuestionValidityShieldImpl(Safety, ShieldsProtocolPrivate):
         self,
         shield_id: str,
         messages: list[Message],
-        params: dict[str, Any] = None,
+        params: dict[str, Any] | None = None,
     ) -> RunShieldResponse:
-        shield = await self.shield_store.get_shield(shield_id)
-        if not shield:
-            raise ValueError(f"Unknown shield {shield_id}")
+        # shield = await self.shield_store.get_shield(shield_id)
+        # if not shield:
+        #     raise ValueError(f"Unknown shield {shield_id}")
 
         messages = messages.copy()
         # [TODO] manstis: Ensure this is the latest User message
