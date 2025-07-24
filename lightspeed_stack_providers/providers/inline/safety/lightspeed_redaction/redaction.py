@@ -101,11 +101,8 @@ class RedactionShieldImpl(Safety, ShieldsProtocolPrivate):
                     )
                     applied_rules.append(rule["original_pattern"])
 
-                    if self.config.log_redactions:
-                        log.info(f"Applied redaction rule: {rule['original_pattern']}")
-
             except Exception as e:
-                log.error(f"Error applying rule {rule['original_pattern']}: {e}")
+                log.debug(f"Error applying rule {rule['original_pattern']}: {e}")
 
         if applied_rules:
             log.debug(f"Applied {len(applied_rules)} redaction rules to content")

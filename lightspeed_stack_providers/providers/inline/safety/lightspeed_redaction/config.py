@@ -23,12 +23,10 @@ class RedactionShieldConfig(BaseModel):
     def sample_run_config(
         cls,
         rules: List[dict] | None = None,
-        log_redactions: bool = True,
         case_sensitive: bool = False,
         **kwargs,
     ) -> dict[str, Any]:
         return {
             "rules": rules,
-            "log_redactions": log_redactions,
             "case_sensitive": case_sensitive,
         }
