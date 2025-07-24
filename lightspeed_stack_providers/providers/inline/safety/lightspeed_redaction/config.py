@@ -1,82 +1,39 @@
-# from typing import Any, List, Dict
-# from pydantic import BaseModel, Field
-# import yaml
-# import os
+from typing import Any, List
+from pydantic import BaseModel, Field
 
-# class RedactionShieldConfig(BaseModel):
-#     """Configuration for redaction shield."""
-    
-#     config_file: str = Field(
-#         default="config/redaction_config.yaml",
-#         description="Path to YAML configuration file with redaction patterns",
-#     )
-    
-#     log_redactions: bool = Field(
-#         default=True,
-#         description="Whether to log when redactions are applied",
-#     )
-    
-#     @classmethod
-#     def sample_run_config(
-#         cls,
-#         config_file: str = "config/redaction_config.yaml",
-#         log_redactions: bool = True,
-#         **kwargs,
-#     ) -> dict[str, Any]:
-#         return {
-#             "config_file": config_file,
-#             "log_redactions": log_redactions,
-#         }
-    
-#     def load_patterns(self) -> List[Dict[str, str]]:
-#         """Load redaction patterns from YAML file."""
-#         try:
-#             if not os.path.exists(self.config_file):
-#                 return []
-            
-#             with open(self.config_file, 'r') as f:
-#                 config = yaml.safe_load(f)
-            
-#             return config.get("redaction_patterns", [])
-            
-#         except Exception:
-#             return []
+class PatternReplacement(BaseModel):
+    """A single redaction pattern and its replacement."""
+    pattern: str = Field(description="Regular expression pattern to match")
+    replacement: str = Field(description="Text to replace matches with")
 
-import os
-import yaml
-from typing import Any, List, Dict
-
-class RedactionShieldConfig:
-    """Configuration for redaction shield."""
+class RedactionShieldConfig(BaseModel):
+    """Configuration for redaction shield with inline rules."""
     
-    def __init__(self, config_file: str = "config/redaction_config.yaml", log_redactions: bool = True):
-        self.config_file = config_file
-        self.log_redactions = log_redactions
+    rules: List[PatternReplacement] = Field(
+        default=[],
+        description="List of redaction rules with pattern and replacement",
+    )
+    
+    log_redactions: bool = Field(
+        default=True,
+        description="Whether to log when redactions are applied",
+    )
+    
+    case_sensitive: bool = Field(
+        default=False,
+        description="Whether pattern matching is case sensitive",
+    )
     
     @classmethod
     def sample_run_config(
         cls,
-        config_file: str = "config/redaction_config.yaml",
+        rules: List[dict] | None = None,
         log_redactions: bool = True,
+        case_sensitive: bool = False,
         **kwargs,
     ) -> dict[str, Any]:
         return {
-            "config_file": config_file,
+            "rules": rules,
             "log_redactions": log_redactions,
+            "case_sensitive": case_sensitive,
         }
-    
-    def load_patterns(self) -> List[Dict[str, str]]:
-        """Load redaction patterns from YAML file."""
-        try:
-            if not os.path.exists(self.config_file):
-                print(f"Config file {self.config_file} not found")
-                return []
-            
-            with open(self.config_file, 'r') as f:
-                config = yaml.safe_load(f)
-            
-            return config.get("redaction_patterns", [])
-            
-        except Exception as e:
-            print(f"Error loading config: {e}")
-            return []

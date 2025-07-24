@@ -1,12 +1,14 @@
 import logging
 import re
-from typing import Any, List
+from typing import Any, List, Dict, Optional
 
 from lightspeed_stack_providers.providers.inline.safety.lightspeed_redaction.config import (
     RedactionShieldConfig,
+    PatternReplacement,
 )
 
 from llama_stack.apis.shields import Shield
+from llama_stack.distribution.datatypes import Api
 from llama_stack.providers.datatypes import ShieldsProtocolPrivate
 from llama_stack.apis.safety import (
     RunShieldResponse,
@@ -19,94 +21,93 @@ from llama_stack.apis.inference import (
 
 log = logging.getLogger(__name__)
 
+
 class RedactionShieldImpl(Safety, ShieldsProtocolPrivate):
-    """Redaction shield that mutates messages directly."""
-    
-    def __init__(self, config: RedactionShieldConfig, deps: dict[str, Any]) -> None:
-        self.config = config
-        self.patterns = self._load_patterns()
-    
-    def _load_patterns(self) -> List[dict]:
-        """Load and compile redaction patterns."""
-        patterns = []
-        raw_patterns = self.config.load_patterns()
-        
-        for pattern_config in raw_patterns:
+    """Redaction shield that mutates messages with inline rules."""
+
+    def __init__(self, config: RedactionShieldConfig, deps: Dict[str, Any]) -> None:
+        self.config: RedactionShieldConfig = config
+        self.compiled_rules: List[Dict[str, Any]] = self._compile_rules()
+
+    def _compile_rules(self) -> List[Dict[str, Any]]:
+        """Compile regex patterns from configuration rules."""
+        compiled_rules: List[Dict[str, Any]] = []
+
+        for rule in self.config.rules:
             try:
-                compiled_pattern = re.compile(pattern_config["pattern"], re.IGNORECASE)
-                patterns.append({
+                flags: int = 0 if self.config.case_sensitive else re.IGNORECASE
+                compiled_pattern = re.compile(rule.pattern, flags)
+
+                compiled_rules.append({
                     "pattern": compiled_pattern,
-                    "replacement": pattern_config["replacement"],
-                    "original": pattern_config["pattern"]
+                    "replacement": rule.replacement,
+                    "original_pattern": rule.pattern
                 })
-                log.debug(f"Loaded pattern: {pattern_config['pattern']}")
+
+                log.debug(f"Compiled redaction rule: {rule.pattern}")
+
             except re.error as e:
-                log.error(f"Invalid pattern {pattern_config['pattern']}: {e}")
-        
-        log.info(f"Loaded {len(patterns)} redaction patterns")
-        return patterns
-    
+                log.error(f"Invalid regex pattern '{rule.pattern}': {e}")
+            except Exception as e:
+                log.error(f"Error compiling rule {rule.pattern}: {e}")
+
+        log.info(f"Compiled {len(compiled_rules)} redaction rules")
+        return compiled_rules
+
     async def initialize(self) -> None:
         """Initialize the shield."""
         pass
-    
+
     async def shutdown(self) -> None:
         """Shutdown the shield."""
         pass
-    
+
     async def register_shield(self, shield: Shield) -> None:
         """Register a shield."""
         pass
-    
+
     async def run_shield(
         self,
         shield_id: str,
         messages: List[Message],
-        params: dict[str, Any] | None = None,
+        params: Optional[Dict[str, Any]] = None,
     ) -> RunShieldResponse:
-        """Run the redaction shield and mutate messages directly."""
-        
-        # Find the last UserMessage and redact it
-        for i in range(len(messages) - 1, -1, -1):
-            message = messages[i]
-            if isinstance(message, UserMessage):
-                # Apply redaction directly to the message
-                if isinstance(message.content, str):
-                    original_content = message.content
-                    redacted_content = self._apply_redaction(original_content)
-                    
-                    if redacted_content != original_content:
-                        # MUTATE THE MESSAGE DIRECTLY
-                        message.content = redacted_content
-                        log.info(f"Redacted message content: {original_content} -> {redacted_content}")
-                
-                break  # Only redact the most recent UserMessage
-        
-        # Return no violation - redaction is not a violation
+        """Run the redaction shield - mutates messages directly."""
+
+        for message in messages:
+            if isinstance(message, UserMessage) and isinstance(message.content, str):
+                original_content: str = message.content
+                redacted_content: str = self._apply_redaction_rules(original_content)
+
+                if redacted_content != original_content:
+                    message.content = redacted_content  # Mutating in-place
+
         return RunShieldResponse(violation=None)
-    
-    def _apply_redaction(self, content: str) -> str:
-        """Apply redaction patterns to content."""
-        if not content:
+
+    def _apply_redaction_rules(self, content: str) -> str:
+        """Apply all redaction rules to content."""
+        if not content or not self.compiled_rules:
             return content
-            
-        redacted_content = content
-        applied_patterns = []
-        
-        for pattern_info in self.patterns:
+
+        redacted_content: str = content
+        applied_rules: List[str] = []
+
+        for rule in self.compiled_rules:
             try:
-                if pattern_info["pattern"].search(redacted_content):
-                    redacted_content = pattern_info["pattern"].sub(
-                        pattern_info["replacement"],
+                if rule["pattern"].search(redacted_content):
+                    redacted_content = rule["pattern"].sub(
+                        rule["replacement"],
                         redacted_content
                     )
-                    applied_patterns.append(pattern_info["original"])
-                    
+                    applied_rules.append(rule["original_pattern"])
+
                     if self.config.log_redactions:
-                        log.info(f"Applied redaction pattern: {pattern_info['original']}")
-                        
+                        log.info(f"Applied redaction rule: {rule['original_pattern']}")
+
             except Exception as e:
-                log.error(f"Error applying pattern {pattern_info['original']}: {e}")
-                continue
-        
+                log.error(f"Error applying rule {rule['original_pattern']}: {e}")
+
+        if applied_rules:
+            log.debug(f"Applied {len(applied_rules)} redaction rules to content")
+
         return redacted_content
