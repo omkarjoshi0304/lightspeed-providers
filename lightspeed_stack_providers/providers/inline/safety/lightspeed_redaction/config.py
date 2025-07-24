@@ -14,11 +14,6 @@ class RedactionShieldConfig(BaseModel):
         description="List of redaction rules with pattern and replacement",
     )
     
-    log_redactions: bool = Field(
-        default=True,
-        description="Whether to log when redactions are applied",
-    )
-    
     case_sensitive: bool = Field(
         default=False,
         description="Whether pattern matching is case sensitive",
