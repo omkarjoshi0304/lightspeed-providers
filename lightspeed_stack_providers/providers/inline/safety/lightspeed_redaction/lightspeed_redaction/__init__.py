@@ -3,6 +3,7 @@ from lightspeed_stack_providers.providers.inline.safety.lightspeed_redaction.con
     RedactionShieldConfig,
 )
 
+
 async def get_provider_impl(
     config: RedactionShieldConfig,
     deps: dict[str, Any],
@@ -10,6 +11,7 @@ async def get_provider_impl(
     from lightspeed_stack_providers.providers.inline.safety.lightspeed_redaction.redaction import (
         RedactionShieldImpl,
     )
+
     assert isinstance(
         config, RedactionShieldConfig
     ), f"Unexpected config type: {type(config)}"
