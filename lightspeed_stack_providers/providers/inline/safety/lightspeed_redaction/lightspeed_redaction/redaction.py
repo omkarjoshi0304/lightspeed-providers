@@ -38,11 +38,13 @@ class RedactionShieldImpl(Safety, ShieldsProtocolPrivate):
                 flags: int = 0 if self.config.case_sensitive else re.IGNORECASE
                 compiled_pattern = re.compile(rule.pattern, flags)
 
-                compiled_rules.append({
-                    "pattern": compiled_pattern,
-                    "replacement": rule.replacement,
-                    "original_pattern": rule.pattern
-                })
+                compiled_rules.append(
+                    {
+                        "pattern": compiled_pattern,
+                        "replacement": rule.replacement,
+                        "original_pattern": rule.pattern,
+                    }
+                )
 
                 log.debug(f"Compiled redaction rule: {rule.pattern}")
 
@@ -96,8 +98,7 @@ class RedactionShieldImpl(Safety, ShieldsProtocolPrivate):
             try:
                 if rule["pattern"].search(redacted_content):
                     redacted_content = rule["pattern"].sub(
-                        rule["replacement"],
-                        redacted_content
+                        rule["replacement"], redacted_content
                     )
                     applied_rules.append(rule["original_pattern"])
 
