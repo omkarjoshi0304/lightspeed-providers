@@ -230,7 +230,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Documentation
 
 - [Llama Stack Documentation](https://llama-stack.readthedocs.io/)
-- [External Providers Guide]([https://llama-stack.readthedocs.io/en/latest/providers/external.html](https://llama-stack.readthedocs.io/en/latest/providers/external/external-providers-guide.html)
+- [External Providers Guide](https://llama-stack.readthedocs.io/en/latest/providers/external/external-providers-guide.html)
 - [Safety Providers](https://llama-stack.readthedocs.io/en/latest/providers/safety/index.html)
 - [Building Applications](https://llama-stack.readthedocs.io/en/latest/building_applications/safety.html)
 
