@@ -38,7 +38,6 @@ Manual procedure, assuming an existing PyPI API token available:
 - Llama Stack >= 0.2.16
 - pydantic >= 2.10.6
 
-
 ### Installation
 
 1. **Clone the repository**
@@ -66,14 +65,11 @@ Manual procedure, assuming an existing PyPI API token available:
    # Copy providers.d directory to your project
    cp -r lightspeed-providers/resources/external_providers ${env.EXTERNAL_PROVIDERS_DIR:/providers.d}
    ```
-
 2. **Install the Python package**
    ```bash
    pip install lightspeed_stack_providers
    ```
-
 3. **Configure your run.yaml** (see Configuration section below)
-
 
 ## Configuration 
 
@@ -167,10 +163,7 @@ shields:
     provider_id: lightspeed_redaction
     provider_shield_id: lightspeed-redaction-shield
 ```
-
-
 ## Usage Examples
-
 
 ### Testing Redaction
 
@@ -188,9 +181,6 @@ curl -X POST "http://localhost:8321/v1/safety/run_shield" \
     ]
   }'
 ```
-
-
-
 ### Adding New Providers
 
 1. **Create provider directory**
@@ -202,8 +192,6 @@ curl -X POST "http://localhost:8321/v1/safety/run_shield" \
    curl -o ./providers.d/remote/tool_runtime/lightspeed.yaml https://raw.githubusercontent.com/lightspeed-core/lightspeed-providers/refs/heads/main/resources/external_providers/remote/tool_runtime/lightspeed.yaml
    
    ```
-
-
 3. **Add external provider definition**
    ```yaml
    # resources/external_providers/your_provider.yaml
@@ -213,8 +201,6 @@ curl -X POST "http://localhost:8321/v1/safety/run_shield" \
    api_dependencies:
      - safety
    ```
-
-
 ## Contributing
 
 1. Fork the repository
@@ -233,5 +219,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [External Providers Guide](https://llama-stack.readthedocs.io/en/latest/providers/external/external-providers-guide.html)
 - [Safety Providers](https://llama-stack.readthedocs.io/en/latest/providers/safety/index.html)
 - [Building Applications](https://llama-stack.readthedocs.io/en/latest/building_applications/safety.html)
-
-
