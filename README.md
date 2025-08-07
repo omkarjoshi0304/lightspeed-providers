@@ -6,7 +6,7 @@ Custom provider implementations for Llama Stack that extend the capabilities of 
 
 This repository contains custom providers for Llama Stack, including:
 
-- **Question Validity Shield**: Ensures queries are related to OpenShift/Ansible topics
+- **Question Validity Shield**: Ensures queries are related to OpenShift/Ansible topics (It can be Configured for other Platforms).
 - **Redaction Shield**: Automatically detects and redacts sensitive information from user messages
 - **Additional safety and content filtering providers**
 
@@ -26,7 +26,7 @@ Manual procedure, assuming an existing PyPI API token available:
 - **Automatic detection**: Detects credit card numbers, API keys, tokens, passwords, and custom patterns
 
 ###  Question Validity Shield
-- **Topic validation**: Ensures queries are related to specified topics (OpenShift/Ansible)
+- **Topic validation**: Ensures queries are related to specified topics (OpenShift/Ansible) (It can be configured for other Platforms)
 - **LLM-powered classification**: Uses AI to determine query relevance
 - **Customizable responses**: Configure custom messages for invalid queries
 
@@ -90,7 +90,6 @@ providers:
   - provider_id: lightspeed_redaction
     provider_type: inline::lightspeed_redaction
     config:
-        log_redactions: false
         case_sensitive: false
         rules:
           - pattern: "(?i)(password|passwd)[\\s:=]+[^\\s]+"
