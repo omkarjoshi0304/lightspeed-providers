@@ -24,8 +24,6 @@ Manual procedure, assuming an existing PyPI API token available:
 ###  Redaction Shield
 - **Pattern-based redaction**: YAML-configurable regex patterns for flexible content filtering
 - **Automatic detection**: Detects credit card numbers, API keys, tokens, passwords, and custom patterns
-- **Logging support**: Configurable logging of redaction events for monitoring
-- **Framework integration**: Follows Llama Stack shield architecture patterns
 
 ###  Question Validity Shield
 - **Topic validation**: Ensures queries are related to specified topics (OpenShift/Ansible)
@@ -232,7 +230,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Documentation
 
 - [Llama Stack Documentation](https://llama-stack.readthedocs.io/)
-- [External Providers Guide](https://llama-stack.readthedocs.io/en/latest/providers/external.html)
+- [External Providers Guide]([https://llama-stack.readthedocs.io/en/latest/providers/external.html](https://llama-stack.readthedocs.io/en/latest/providers/external/external-providers-guide.html)
 - [Safety Providers](https://llama-stack.readthedocs.io/en/latest/providers/safety/index.html)
 - [Building Applications](https://llama-stack.readthedocs.io/en/latest/building_applications/safety.html)
 
